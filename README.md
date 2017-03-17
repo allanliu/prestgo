@@ -81,7 +81,7 @@ prq "presto://example:8080/hive/default" "SHOW TABLES"
 * `varchar`, `bigint`, `boolean`, `double` and `timestamp` datatypes
 * Custom HTTP clients
 
-## Future 
+## Future
 
 (aka: Things you could help with)
 
@@ -99,20 +99,19 @@ Originally written by [Ian Davis](http://iandavis.com).
 
 ## Contributors
 
-Your name here...
+Allan Liu
 
 ## Contributing
 
 * Do submit your changes as a pull request
 * Do your best to adhere to the existing coding conventions and idioms.
 * Do supply unit tests if possible.
-* Do run `go fmt` on the code before committing 
+* Do run `go fmt` on the code before committing
 * Do feel free to add yourself to the Contributors list in
   the [`README.md`](README.md).  Alphabetical order applies.
-* Don't touch the Authors section. An existing author will add you if 
+* Don't touch the Authors section. An existing author will add you if
   your contributions are significant enough.
 
 ## License
 
 This software is released under the MIT License, please see the accompanying [`LICENSE`](LICENSE) file.
-

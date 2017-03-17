@@ -37,6 +37,9 @@ const (
 	// Instant in time that includes the date and time of day with a time zone. Values of this type are parsed and rendered in the provided time zone.
 	// Example: TIMESTAMP '2001-08-22 03:04:05.321' AT TIME ZONE 'America/Los_Angeles'
 	TimestampWithTimezone = "timestamp with time zone"
+
+	digits01 = "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
+	digits10 = "0000000000111111111122222222223333333333444444444455555555556666666666777777777788888888889999999999"
 )
 
 type stmtResponse struct {

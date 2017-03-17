@@ -85,8 +85,9 @@ var _ driver.Conn = &conn{}
 
 func (c *conn) Prepare(query string) (driver.Stmt, error) {
 	st := &stmt{
-		conn:  c,
-		query: query,
+		conn:         c,
+		query:        query,
+		paramOffsets: getParameterOffsets(query),
 	}
 	return st, nil
 }
@@ -97,71 +98,6 @@ func (c *conn) Close() error {
 
 func (c *conn) Begin() (driver.Tx, error) {
 	return nil, ErrNotSupported
-}
-
-type stmt struct {
-	conn  *conn
-	query string
-}
-
-var _ driver.Stmt = &stmt{}
-
-func (s *stmt) Close() error {
-	return nil
-}
-
-func (s *stmt) NumInput() int {
-	return -1 // TODO: parse query for parameters
-}
-
-func (s *stmt) Exec(args []driver.Value) (driver.Result, error) {
-	return nil, ErrNotSupported
-}
-
-func (s *stmt) Query(args []driver.Value) (driver.Rows, error) {
-	// TODO: support query argument substitution
-	if len(args) > 0 {
-		return nil, ErrNotSupported
-	}
-	queryURL := fmt.Sprintf("http://%s/v1/statement", s.conn.addr)
-
-	req, err := http.NewRequest("POST", queryURL, strings.NewReader(s.query))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("X-Presto-User", s.conn.user)
-	req.Header.Add("X-Presto-Catalog", s.conn.catalog)
-	req.Header.Add("X-Presto-Schema", s.conn.schema)
-
-	resp, err := s.conn.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Presto doesn't use the http response code, parse errors come back as 200
-	if resp.StatusCode != 200 {
-		return nil, ErrQueryFailed
-	}
-
-	var sresp stmtResponse
-	err = json.NewDecoder(resp.Body).Decode(&sresp)
-	if err != nil {
-		return nil, err
-	}
-
-	if sresp.Stats.State == "FAILED" {
-		return nil, sresp.Error
-	}
-
-	time.Sleep(500 * time.Millisecond)
-
-	r := &rows{
-		conn:    s.conn,
-		nextURI: sresp.NextURI,
-	}
-
-	return r, nil
 }
 
 type rows struct {

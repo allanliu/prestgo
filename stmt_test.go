@@ -56,29 +56,28 @@ GROUP BY (abc, def, ghi, jkl, mno, pqr, sto, uvw, xyz, abc_def, ghi_ppp)`,
 	for i, test := range tests {
 		t.Logf("test %d: %q", i, test.desc)
 
-		t.Run(test.name, func(t *testing.T) {
-			offsets := getParameterOffsets(test.query)
+		offsets := getParameterOffsets(test.query)
 
-			if len(offsets) != test.expectedCount {
-				t.Fatalf(
-					"getParameterOffsets(%q) -> expected count of %d, got %d",
+		if len(offsets) != test.expectedCount {
+			t.Fatalf(
+				"getParameterOffsets(%q) -> expected count of %d, got %d",
+				test.query,
+				test.expectedCount,
+				len(offsets),
+			)
+		}
+
+		for _, offset := range offsets {
+			if test.query[offset] != '?' {
+				t.Errorf(
+					"getParameterOffsets(%q) -> expected offset %d to be '?' but got %q",
 					test.query,
-					test.expectedCount,
-					len(offsets),
+					offset,
+					test.query[offset],
 				)
 			}
+		}
 
-			for _, offset := range offsets {
-				if test.query[offset] != '?' {
-					t.Errorf(
-						"getParameterOffsets(%q) -> expected offset %d to be '?' but got %q",
-						test.query,
-						offset,
-						test.query[offset],
-					)
-				}
-			}
-		})
 	}
 }
 
@@ -172,30 +171,29 @@ func TestQueryInterpolate(t *testing.T) {
 	for i, test := range happPathTests {
 		t.Logf("happy path test %d: %q", i, test.desc)
 
-		t.Run(test.name, func(t *testing.T) {
-			s := &stmt{
-				query:        test.inputQuery,
-				paramOffsets: getParameterOffsets(test.inputQuery),
-			}
+		s := &stmt{
+			query:        test.inputQuery,
+			paramOffsets: getParameterOffsets(test.inputQuery),
+		}
 
-			got, err := s.queryInterpolate(test.queryArgs)
-			if err != nil {
-				t.Fatalf(
-					"stmt.queryInterpolate(%v) -> error: %v; expected nil",
-					test.queryArgs,
-					err,
-				)
-			}
+		got, err := s.queryInterpolate(test.queryArgs)
+		if err != nil {
+			t.Fatalf(
+				"stmt.queryInterpolate(%v) -> error: %v; expected nil",
+				test.queryArgs,
+				err,
+			)
+		}
 
-			if got != test.expectedOutput {
-				t.Errorf(
-					"stmt.queryInterpolate(%v) -> %q; expected %q",
-					test.queryArgs,
-					got,
-					test.expectedOutput,
-				)
-			}
-		})
+		if got != test.expectedOutput {
+			t.Errorf(
+				"stmt.queryInterpolate(%v) -> %q; expected %q",
+				test.queryArgs,
+				got,
+				test.expectedOutput,
+			)
+		}
+
 	}
 
 	var negativeTests = []struct {
@@ -227,18 +225,17 @@ func TestQueryInterpolate(t *testing.T) {
 	for i, test := range negativeTests {
 		t.Logf("negative path test %d: %q", i, test.desc)
 
-		t.Run(test.name, func(t *testing.T) {
-			s := &stmt{
-				query:        test.inputQuery,
-				paramOffsets: getParameterOffsets(test.inputQuery),
-			}
+		s := &stmt{
+			query:        test.inputQuery,
+			paramOffsets: getParameterOffsets(test.inputQuery),
+		}
 
-			if _, err := s.queryInterpolate(test.queryArgs); err == nil {
-				t.Errorf(
-					"stmt.queryInterpolate(%v) -> nil error; expected and error",
-					test.queryArgs,
-				)
-			}
-		})
+		if _, err := s.queryInterpolate(test.queryArgs); err == nil {
+			t.Errorf(
+				"stmt.queryInterpolate(%v) -> nil error; expected and error",
+				test.queryArgs,
+			)
+		}
+
 	}
 }
